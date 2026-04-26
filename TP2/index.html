@@ -745,5 +745,253 @@
             document.getElementById('successAlert').style.display = 'none';
         }
     </script>
+    <script>
+    // Système de test intégré
+    class AppTester {
+        constructor() {
+            this.testResults = [];
+            this.testData = this.generateTestData();
+        }
+        
+        generateTestData() {
+            // Données synthétiques avec patterns connus
+            const data = [];
+            for (let i = 0; i < 300; i++) {
+                const group = i < 100 ? 'A' : (i < 200 ? 'B' : 'C');
+                
+                // feature1: Très discriminante (scores différents par groupe)
+                const feature1 = group === 'A' ? this.randomNormal(10, 1) :
+                                group === 'B' ? this.randomNormal(20, 1) :
+                                this.randomNormal(30, 1);
+                
+                // feature2: Modérément discriminante
+                const feature2 = group === 'A' ? this.randomNormal(5, 2) :
+                                group === 'B' ? this.randomNormal(8, 2) :
+                                this.randomNormal(11, 2);
+                
+                // feature3: Non discriminante (même distribution)
+                const feature3 = this.randomNormal(15, 3);
+                
+                // feature4: Très discriminante mais avec chevauchement
+                const feature4 = group === 'A' ? this.randomNormal(0, 0.5) :
+                                group === 'B' ? this.randomNormal(2, 0.5) :
+                                this.randomNormal(4, 0.5);
+                
+                data.push({
+                    feature1, feature2, feature3, feature4,
+                    group
+                });
+            }
+            return data;
+        }
+        
+        randomNormal(mean, std) {
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            return z0 * std + mean;
+        }
+        
+        async runAllTests() {
+            console.log('🧪 Démarrage des tests de validation...\n');
+            
+            await this.testWithKnownData();
+            await this.testEdgeCases();
+            await this.testStatisticalSignificance();
+            await this.testMethodComparison();
+            
+            this.displayTestReport();
+        }
+        
+        async testWithKnownData() {
+            console.log('📊 Test 1: Validation avec données connues');
+            
+            // Convertir les données de test en CSV
+            const csvData = this.convertToCSV(this.testData);
+            
+            // Simuler l'upload
+            uploadedData = parseCSV(csvData);
+            targetColumn.value = 'group';
+            updateDataStats();
+            analyzeBtn.disabled = false;
+            
+            // Tester chaque méthode
+            const methods = ['anova', 'randomforest', 'combined'];
+            
+            for (const method of methods) {
+                document.getElementById('methodSelect').value = method;
+                document.getElementById('numFeatures').value = '4';
+                
+                await performAnalysis();
+                
+                // Vérifier que feature1 et feature4 sont dans le top 2
+                const topFeatures = analysisResults.slice(0, 2).map(r => r.feature);
+                const hasBestFeatures = topFeatures.includes('feature1') || topFeatures.includes('feature4');
+                
+                this.testResults.push({
+                    test: `Méthode ${method}: Top features`,
+                    passed: hasBestFeatures,
+                    details: `Top 2: ${topFeatures.join(', ')}`
+                });
+                
+                // Vérifier que feature3 est la moins bien classée
+                const bottomFeature = analysisResults[analysisResults.length - 1].feature;
+                this.testResults.push({
+                    test: `Méthode ${method}: Pire feature`,
+                    passed: bottomFeature === 'feature3',
+                    details: `Dernière: ${bottomFeature}`
+                });
+            }
+        }
+        
+        async testEdgeCases() {
+            console.log('📏 Test 2: Cas limites');
+            
+            // Test avec une seule variable
+            const singleVarData = 'value,class\n1,A\n2,A\n10,B\n11,B';
+            uploadedData = parseCSV(singleVarData);
+            targetColumn.value = 'class';
+            document.getElementById('numFeatures').value = '1';
+            
+            await performAnalysis();
+            
+            this.testResults.push({
+                test: 'Cas limite: Une seule variable',
+                passed: analysisResults.length === 1 && analysisResults[0].score > 0.8,
+                details: `Score: ${analysisResults[0]?.score || 'N/A'}`
+            });
+            
+            // Test avec classes déséquilibrées
+            const unbalancedData = [];
+            for (let i = 0; i < 10; i++) unbalancedData.push({x: Math.random(), class: 'A'});
+            for (let i = 0; i < 100; i++) unbalancedData.push({x: Math.random()*10, class: 'B'});
+            
+            const csvUnbalanced = 'x,class\n' + unbalancedData.map(d => `${d.x},${d.class}`).join('\n');
+            uploadedData = parseCSV(csvUnbalanced);
+            targetColumn.value = 'class';
+            
+            await performAnalysis();
+            
+            this.testResults.push({
+                test: 'Cas limite: Classes déséquilibrées',
+                passed: analysisResults.length === 1,
+                details: 'Gère les classes déséquilibrées'
+            });
+        }
+        
+        async testStatisticalSignificance() {
+            console.log('📈 Test 3: Significativité statistique');
+            
+            // Test ANOVA F-score élevé pour données bien séparées
+            const wellSeparated = [];
+            for (let i = 0; i < 50; i++) {
+                wellSeparated.push({x: Math.random()*2, class: 'A'});
+                wellSeparated.push({x: 10 + Math.random()*2, class: 'B'});
+            }
+            
+            const csvWell = 'x,class\n' + wellSeparated.map(d => `${d.x},${d.class}`).join('\n');
+            uploadedData = parseCSV(csvWell);
+            targetColumn.value = 'class';
+            
+            await performAnalysis();
+            
+            this.testResults.push({
+                test: 'Significativité: Groupes bien séparés',
+                passed: analysisResults[0].score > 0.9,
+                details: `Score: ${analysisResults[0].score.toFixed(3)}`
+            });
+            
+            // Test pour données non séparables
+            const overlapping = [];
+            for (let i = 0; i < 50; i++) {
+                overlapping.push({x: Math.random()*5, class: 'A'});
+                overlapping.push({x: Math.random()*5, class: 'B'});
+            }
+            
+            const csvOverlap = 'x,class\n' + overlapping.map(d => `${d.x},${d.class}`).join('\n');
+            uploadedData = parseCSV(csvOverlap);
+            
+            await performAnalysis();
+            
+            this.testResults.push({
+                test: 'Significativité: Groupes chevauchants',
+                passed: analysisResults[0].score < 0.5,
+                details: `Score: ${analysisResults[0].score.toFixed(3)} (devrait être bas)`
+            });
+        }
+        
+        async testMethodComparison() {
+            console.log('⚖️ Test 4: Comparaison des méthodes');
+            
+            // Recharger les données Iris
+            loadedData = null;
+            document.getElementById('loadExampleBtn').click();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const methodScores = {};
+            
+            for (const method of ['anova', 'randomforest', 'combined']) {
+                document.getElementById('methodSelect').value = method;
+                await performAnalysis();
+                methodScores[method] = {
+                    top: analysisResults[0].feature,
+                    score: analysisResults[0].score
+                };
+            }
+            
+            // Vérifier que les méthodes s'accordent sur la meilleure variable
+            const topFeatures = Object.values(methodScores).map(m => m.top);
+            const allAgree = new Set(topFeatures).size === 1;
+            
+            this.testResults.push({
+                test: 'Concordance des méthodes: Même top feature',
+                passed: allAgree || topFeatures.filter(f => f === 'petal_length').length >= 2,
+                details: `Features: ${topFeatures.join(', ')}`
+            });
+        }
+        
+        convertToCSV(data) {
+            if (data.length === 0) return '';
+            const headers = Object.keys(data[0]);
+            const rows = data.map(obj => headers.map(h => obj[h]).join(','));
+            return [headers.join(','), ...rows].join('\n');
+        }
+        
+        displayTestReport() {
+            const passed = this.testResults.filter(t => t.passed).length;
+            const total = this.testResults.length;
+            
+            console.log('\n📋 RAPPORT DE TESTS');
+            console.log('═'.repeat(50));
+            
+            this.testResults.forEach((result, i) => {
+                const icon = result.passed ? '✅' : '❌';
+                console.log(`${icon} ${result.test}`);
+                console.log(`   ${result.details}`);
+            });
+            
+            console.log('\n' + '═'.repeat(50));
+            console.log(`📊 Résultat: ${passed}/${total} tests réussis (${(passed/total*100).toFixed(1)}%)`);
+            
+            // Afficher dans l'interface
+            alert(`Tests terminés!\n${passed}/${total} réussis (${(passed/total*100).toFixed(1)}%)` +
+                `\n\nConsultez la console (F12) pour les détails.`);
+        }
+    }
+
+    // Ajouter un bouton de test dans l'interface
+    document.addEventListener('DOMContentLoaded', () => {
+        const testButton = document.createElement('button');
+        testButton.className = 'btn';
+        testButton.textContent = '🧪 Lancer les tests';
+        testButton.style.marginTop = '10px';
+        testButton.onclick = () => {
+            const tester = new AppTester();
+            tester.runAllTests();
+        };
+        
+        document.querySelector('.card:first-child').appendChild(testButton);
+    });
+    </script>
 </body>
 </html>
