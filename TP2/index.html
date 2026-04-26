@@ -7,258 +7,271 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ml-random-forest@2.1.0/random-forest.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: #f5f6fa;
+        min-height: 100vh;
+        padding: 20px;
+        color: #2c3e50;
+    }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 
-        h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
+    h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2em;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+    }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
 
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+    .card {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        border: 1px solid #e8eaed;
+    }
 
-        .card-full {
-            grid-column: 1 / -1;
-        }
+    .card-full {
+        grid-column: 1 / -1;
+    }
 
-        .card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
+    .card h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.25em;
+        font-weight: 600;
+        border-bottom: 2px solid #e8eaed;
+        padding-bottom: 12px;
+    }
 
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9ff;
-        }
+    .upload-area {
+        border: 2px dashed #bdc3c7;
+        border-radius: 6px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fafbfc;
+    }
 
-        .upload-area:hover {
-            background: #e8e9ff;
-            border-color: #764ba2;
-        }
+    .upload-area:hover {
+        background: #f5f6fa;
+        border-color: #95a5a6;
+    }
 
-        .upload-area.dragover {
-            background: #d4d6ff;
-            border-color: #764ba2;
-        }
+    .upload-area.dragover {
+        background: #e8eaed;
+        border-color: #7f8c8d;
+    }
 
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin: 5px;
-        }
+    .btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin: 4px;
+    }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    .btn:hover {
+        background: #2980b9;
+    }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+    .btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+    }
 
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
+    .btn-secondary {
+        background: #7f8c8d;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .btn-secondary:hover {
+        background: #6c7a7d;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-        select, input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-weight: 500;
+        font-size: 14px;
+    }
 
-        select:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+    select, input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dcdde1;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+        background: white;
+        color: #2c3e50;
+    }
 
-        .variable-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 15px;
-        }
+    select:focus, input[type="number"]:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
 
-        .variable-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9ff;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
+    .variable-list {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 15px;
+    }
 
-        .score {
-            font-weight: bold;
-            color: #667eea;
-        }
+    .variable-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        margin: 4px 0;
+        background: #fafbfc;
+        border-radius: 4px;
+        border-left: 3px solid #3498db;
+    }
 
-        .score-bar {
-            height: 8px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
-            margin-top: 5px;
-            transition: width 0.5s ease;
-        }
+    .score {
+        font-weight: 600;
+        color: #3498db;
+        font-size: 14px;
+    }
 
-        .charts-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-        }
+    .score-bar {
+        height: 6px;
+        background: #3498db;
+        border-radius: 3px;
+        margin-top: 6px;
+        transition: width 0.3s ease;
+    }
 
-        canvas {
-            max-height: 300px;
-        }
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
 
-        .statistics {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
+    canvas {
+        max-height: 300px;
+    }
 
-        .stat-box {
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8e9ff 100%);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
+    .statistics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 15px;
+    }
 
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #667eea;
-        }
+    .stat-box {
+        background: #fafbfc;
+        padding: 16px;
+        border-radius: 4px;
+        border: 1px solid #e8eaed;
+    }
 
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
+    .stat-value {
+        font-size: 1.75em;
+        font-weight: 600;
+        color: #2c3e50;
+    }
 
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.85em;
+        margin-top: 4px;
+    }
 
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    .spinner {
+        border: 3px solid #e8eaed;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto;
+    }
 
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
-        }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-        .alert-error {
-            background: #ffe0e0;
-            color: #d32f2f;
-            border: 1px solid #d32f2f;
-        }
+    .alert {
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 12px 0;
+        display: none;
+        font-size: 14px;
+    }
 
-        .alert-success {
-            background: #e0ffe0;
-            color: #2e7d32;
-            border: 1px solid #2e7d32;
-        }
+    .alert-error {
+        background: #fdf0ef;
+        color: #c0392b;
+        border: 1px solid #fab1a0;
+    }
 
-        .group-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            background: #667eea;
-            color: white;
-            font-size: 0.85em;
-            margin: 2px;
-        }
-    </style>
+    .alert-success {
+        background: #edf7ed;
+        color: #27ae60;
+        border: 1px solid #a3d9a3;
+    }
+
+    .group-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 3px;
+        background: #e8eaed;
+        color: #2c3e50;
+        font-size: 0.85em;
+        margin: 2px;
+    }
+</style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Sélecteur de Variables Discriminantes</h1>
+        <h1>Sélecteur de Variables Discriminantes</h1>
         
         <div class="dashboard">
-            <!-- Zone d'upload et configuration -->
+           
             <div class="card">
-                <h2>📁 Configuration</h2>
+                <h2>Configuration</h2>
                 <div class="upload-area" id="uploadArea">
-                    <p>📂 Déposez votre fichier CSV ici</p>
+                    <p>Déposez votre fichier CSV ici</p>
                     <p style="color: #666; margin-top: 10px;">ou</p>
                     <input type="file" id="fileInput" accept=".csv" style="display: none;">
                     <button class="btn" onclick="document.getElementById('fileInput').click()">
@@ -267,14 +280,14 @@
                 </div>
                 
                 <div class="form-group" style="margin-top: 20px;">
-                    <label for="targetColumn">🎯 Colonne cible (classes) :</label>
+                    <label for="targetColumn">Colonne cible (classes) :</label>
                     <select id="targetColumn" disabled>
                         <option value="">Sélectionnez une colonne...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="methodSelect">🔬 Méthode de sélection :</label>
+                    <label for="methodSelect">Méthode de sélection :</label>
                     <select id="methodSelect">
                         <option value="combined">Méthode combinée (ANOVA + Random Forest)</option>
                         <option value="anova">ANOVA seulement</option>
@@ -283,15 +296,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="numFeatures">📊 Nombre de variables à sélectionner :</label>
+                    <label for="numFeatures">Nombre de variables à sélectionner :</label>
                     <input type="number" id="numFeatures" value="10" min="1" max="50">
                 </div>
 
                 <button class="btn" id="analyzeBtn" disabled>
-                    🚀 Analyser
+                    Analyser
                 </button>
                 <button class="btn btn-secondary" id="loadExampleBtn">
-                    📥 Charger exemple Iris
+                    Charger exemple Iris
                 </button>
 
                 <div class="loading" id="loading">
@@ -302,9 +315,9 @@
                 <div class="alert alert-success" id="successAlert"></div>
             </div>
 
-            <!-- Résumé des données -->
+            
             <div class="card">
-                <h2>📊 Résumé des Données</h2>
+                <h2>Résumé des Données</h2>
                 <div class="statistics" id="dataStats">
                     <div class="stat-box">
                         <div class="stat-value" id="numSamples">-</div>
@@ -328,7 +341,7 @@
 
             <!-- Top variables -->
             <div class="card">
-                <h2>🏆 Meilleures Variables Discriminantes</h2>
+                <h2>Meilleures Variables Discriminantes</h2>
                 <div class="variable-list" id="topVariables">
                     <p style="color: #999;">Chargez des données pour voir les résultats</p>
                 </div>
@@ -336,7 +349,7 @@
 
             <!-- Visualisations -->
             <div class="card">
-                <h2>📈 Visualisation des Scores</h2>
+                <h2>Visualisation des Scores</h2>
                 <div style="height: 300px;">
                     <canvas id="scoresChart"></canvas>
                 </div>
@@ -793,7 +806,7 @@
         }
         
         async runAllTests() {
-            console.log('🧪 Démarrage des tests de validation...\n');
+            console.log('Démarrage des tests de validation...\n');
             
             await this.testWithKnownData();
             await this.testEdgeCases();
@@ -804,7 +817,7 @@
         }
         
         async testWithKnownData() {
-            console.log('📊 Test 1: Validation avec données connues');
+            console.log('Test 1: Validation avec données connues');
             
             // Convertir les données de test en CSV
             const csvData = this.convertToCSV(this.testData);
@@ -845,7 +858,7 @@
         }
         
         async testEdgeCases() {
-            console.log('📏 Test 2: Cas limites');
+            console.log('Test 2: Cas limites');
             
             // Test avec une seule variable
             const singleVarData = 'value,class\n1,A\n2,A\n10,B\n11,B';
@@ -880,7 +893,7 @@
         }
         
         async testStatisticalSignificance() {
-            console.log('📈 Test 3: Significativité statistique');
+            console.log('Test 3: Significativité statistique');
             
             // Test ANOVA F-score élevé pour données bien séparées
             const wellSeparated = [];
@@ -921,7 +934,7 @@
         }
         
         async testMethodComparison() {
-            console.log('⚖️ Test 4: Comparaison des méthodes');
+            console.log('Test 4: Comparaison des méthodes');
             
             // Recharger les données Iris
             loadedData = null;
@@ -961,7 +974,7 @@
             const passed = this.testResults.filter(t => t.passed).length;
             const total = this.testResults.length;
             
-            console.log('\n📋 RAPPORT DE TESTS');
+            console.log('\nRAPPORT DE TESTS');
             console.log('═'.repeat(50));
             
             this.testResults.forEach((result, i) => {
@@ -971,7 +984,7 @@
             });
             
             console.log('\n' + '═'.repeat(50));
-            console.log(`📊 Résultat: ${passed}/${total} tests réussis (${(passed/total*100).toFixed(1)}%)`);
+            console.log(`Résultat: ${passed}/${total} tests réussis (${(passed/total*100).toFixed(1)}%)`);
             
             // Afficher dans l'interface
             alert(`Tests terminés!\n${passed}/${total} réussis (${(passed/total*100).toFixed(1)}%)` +
@@ -983,7 +996,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         const testButton = document.createElement('button');
         testButton.className = 'btn';
-        testButton.textContent = '🧪 Lancer les tests';
+        testButton.textContent = 'Lancer les tests';
         testButton.style.marginTop = '10px';
         testButton.onclick = () => {
             const tester = new AppTester();
